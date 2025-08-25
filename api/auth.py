@@ -5,7 +5,7 @@ from dto.auth_dto import LoginRequest, LoginResponse, MeResponse
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-# ⚡️ Déclare le scheme AVANT de l'utiliser
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
@@ -14,7 +14,7 @@ def login(req: LoginRequest, response: Response):
     try:
         login_data = login_service(req)
         print(login_data.access_token)
-        # Cookie HTTPOnly côté endpoint
+       
         response.set_cookie(
             key="access_token",
             value=login_data.access_token,
@@ -30,12 +30,12 @@ def login(req: LoginRequest, response: Response):
 @router.get("/config/me", response_model=MeResponse)
 def get_me(response: Response, token: str = Depends(oauth2_scheme)):
     try:
-        # Vérifier et éventuellement rafraîchir le token
+      
         result = verify_token(token)
 
-        # Si le token a été rafraîchi, result sera un string
+      
         if isinstance(result, str):
-            # Mettre à jour le cookie HTTPOnly avec le nouveau token
+           
             response.set_cookie(
                 key="access_token",
                 value=result,
@@ -43,11 +43,11 @@ def get_me(response: Response, token: str = Depends(oauth2_scheme)):
                 max_age=3600,
                 samesite="lax"
             )
-            token_to_use = result  # utiliser le nouveau token pour le service
+            token_to_use = result  
         else:
-            token_to_use = token  # token encore valide
+            token_to_use = token  
 
-        # Appel du service avec le token correct
+        
         return me_service(token_to_use)
 
     except Exception as e:

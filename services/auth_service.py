@@ -77,15 +77,15 @@ def verify_token(access_token: str) -> dict:
     Vérifie le token dans Redis, le rafraîchit si expiré,
     et retourne les infos utilisateur valides + token.
     """
-    # 1️⃣ Vérifier cache
+    
     cached_user = redis_client.get(f"token:{access_token}")
     if cached_user:
         data = json.loads(cached_user)
-        data["access_token"] = access_token  # ajouter le token original
+        data["access_token"] = access_token  
         return data
         
 
-    # 2️⃣ Token non trouvé ou expiré → vérifier via Supabase
+    
     try:
         user_res = supabase.auth.get_user(access_token)
         if not user_res or not user_res.user:
@@ -93,11 +93,11 @@ def verify_token(access_token: str) -> dict:
         user = user_res.user
         data = {"id": user.id, "email": user.email, "access_token": access_token}
 
-        # Mettre à jour le cache
+        
         redis_client.setex(f"token:{access_token}", 3600, json.dumps({"id": user.id, "email": user.email}))
         return data
     except Exception as e:
-        # 3️⃣ Si token expiré et refresh_token disponible
+       
         refresh_token = redis_client.get(f"refresh:{access_token}")
         if refresh_token:
             session = refresh_access_token(refresh_token)
@@ -105,7 +105,7 @@ def verify_token(access_token: str) -> dict:
             user = session.user
             data = {"id": user.id, "email": user.email, "access_token": new_access_token}
 
-            # Mettre à jour Redis avec le nouveau token
+            
             redis_client.setex(f"token:{new_access_token}", 3600, json.dumps({"id": user.id, "email": user.email}))
             redis_client.setex(f"refresh:{new_access_token}", 3600*24*30, refresh_token)
         
