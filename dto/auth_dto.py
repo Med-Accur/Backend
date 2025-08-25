@@ -17,4 +17,9 @@ class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-    user: MeResponse  # MeResponse doit être défini avant
+    id: str
+    email: str
+
+
+class LogoutResponse(BaseModel):
+    message: str
