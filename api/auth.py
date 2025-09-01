@@ -31,7 +31,6 @@ def login(req: LoginRequest, response: Response):
     return login_data
 
 
-
 @router.get("/config/me", response_model=MeResponse)
 def me(response: Response, token: str = Depends(oauth2_scheme), refresh_token: str = Cookie(None)):
     """

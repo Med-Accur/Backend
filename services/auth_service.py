@@ -7,7 +7,7 @@ from core.config import supabase
 # Initialisation Redis
 redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
-# ⚡ Durées réduites pour tester
+#  Durées réduites pour tester
 ACCESS_TOKEN_TTL = 3600       # 1 heure
 REFRESH_TOKEN_TTL = 3600*24*30     # 30 jours
 
@@ -48,9 +48,9 @@ def verify_and_refresh_token_service(response: Response, access_token: str, refr
 
     if cached_user:
         user_data = json.loads(cached_user)
-        print("[TOKEN] Access token valide ✅")
+        print("[TOKEN] Access token valide ")
     else:
-        print("[TOKEN] Access token expiré ❌")
+        print("[TOKEN] Access token expiré ")
         if not refresh_token:
             raise HTTPException(status_code=401, detail="Token expiré, reconnectez-vous")
 
@@ -72,7 +72,7 @@ def verify_and_refresh_token_service(response: Response, access_token: str, refr
 
         new_access_token = auth_res.session.access_token
         new_refresh_token = auth_res.session.refresh_token
-        print("[TOKEN] Nouveau access_token et refresh_token générés via refresh 🔄")
+        print("[TOKEN] Nouveau access_token et refresh_token générés via refresh ")
 
     # Mettre à jour les cookies si nécessaire
     if new_access_token:
