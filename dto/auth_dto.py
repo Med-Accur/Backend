@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 class LoginRequest(BaseModel):
     email: str
@@ -17,4 +17,18 @@ class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-    user: MeResponse  # MeResponse doit être défini avant
+    id: str
+    email: str
+
+
+class LogoutResponse(BaseModel):
+    message: str
+
+
+class RpcRequest(BaseModel):
+    widget_id: str
+    rpc_name: str
+    params: Optional[Dict[str, Any]] = None
+
+class MultiRpcRequest(BaseModel):
+    rpcs: List[RpcRequest]
