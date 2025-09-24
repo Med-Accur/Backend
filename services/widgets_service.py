@@ -30,6 +30,28 @@ from services.cmd_client.kpi import (
     get_kpi_duree_cycle_moyenne_jours
 )
 
+from services.stock.kpi import (
+    get_kpi_quantite_stock,
+    get_kpi_quantite_reservee,
+    get_kpi_stock_disponible,
+    get_kpi_days_on_hand,
+    get_kpi_taux_rotation,
+    get_kpi_inventory_to_sales,
+    get_kpi_rentabilite_stock,
+    get_kpi_taux_rupture,
+    get_kpi_remaining_shelf_life_avg,
+    get_kpi_produits_proches_peremption,
+    get_kpi_contraction_stock_qte,
+)
+from services.fournisseur.kpi import (
+    get_sup_on_time_rate,
+    get_sup_quality_conform_rate,
+    get_sup_quality_nonconform_rate,
+    get_sup_return_rate,
+    get_sup_avg_lead_time_days,
+    get_sup_transport_cost_ratio,
+)
+
 def get_table_cmd_clients_service(tables):
     commandes = tables.get("commandeclient", [])
     contacts = tables.get("contact", [])
@@ -97,5 +119,22 @@ RPC_PYTHON_MAP = {
     "kpi_cout_horaire_unite": get_kpi_cout_horaire_unite,
     "kpi_taux_erreur": get_kpi_taux_erreur,
     "kpi_taux_recyclage": get_kpi_taux_recyclage,
+    "kpi_quantite_stock": get_kpi_quantite_stock,
+    "kpi_quantite_reservee": get_kpi_quantite_reservee,
+    "kpi_stock_disponible": get_kpi_stock_disponible,
+    "kpi_days_on_hand": get_kpi_days_on_hand,
+    "kpi_taux_rotation": get_kpi_taux_rotation,
+    "kpi_inventory_to_sales": get_kpi_inventory_to_sales,
+    "kpi_rentabilite_stock": get_kpi_rentabilite_stock,
+    "kpi_taux_rupture": get_kpi_taux_rupture,
+    "kpi_remaining_shelf_life_avg": get_kpi_remaining_shelf_life_avg,
+    "kpi_produits_proches_peremption": get_kpi_produits_proches_peremption,
+    "kpi_contraction_stock_qte": get_kpi_contraction_stock_qte,
+    "kpi_sup_on_time_rate": get_sup_on_time_rate,
+    "kpi_sup_quality_conform_rate": get_sup_quality_conform_rate,
+    "kpi_sup_quality_nonconform_rate": get_sup_quality_nonconform_rate,
+    "kpi_sup_return_rate": get_sup_return_rate,
+    "kpi_sup_avg_lead_time_days": get_sup_avg_lead_time_days,
+    "kpi_sup_transport_cost_ratio": get_sup_transport_cost_ratio,
     # Ajouter d’autres fonctions Python si besoin
 }
