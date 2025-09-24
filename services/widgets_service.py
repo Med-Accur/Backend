@@ -1,5 +1,27 @@
 # services/widgets_service.py
 from collections import defaultdict
+from services.production.kpi import (
+    get_kpi_adherence_plan, 
+    get_kpi_lead_time, 
+    get_kpi_respect_planning, 
+    get_kpi_taux_conformite, 
+    get_kpi_taux_defauts, 
+    get_kpi_taux_retouche, 
+    get_kpi_temps_cycle,
+    get_kpi_trs, 
+    get_kpi_uph, 
+    get_kpi_volume_production, 
+    get_kpi_wip
+)
+from services.cap_charge.kpi import (
+    get_kpi_productivite,
+    get_kpi_ecart_charge,
+    get_kpi_taux_utilisation,
+    get_kpi_efficacite,
+    get_kpi_cout_horaire_unite,
+    get_kpi_taux_erreur,
+    get_kpi_taux_recyclage
+)
 from services.cmd_client.kpi import (
     get_kpi_nb_commandes,
     get_kpi_taux_retards,
@@ -36,7 +58,6 @@ def get_change_log(tables):
 
     result = []
     for cmd_id, changes in changelog_by_cmd.items():
-        # Trier par date_changement_statut pour simuler LAG
         changes_sorted = changes
         ancien_statut = 'first'
         for change in changes_sorted:
@@ -47,18 +68,34 @@ def get_change_log(tables):
                 "date_changement_statut": change["date_changement_statut"]
             })
             ancien_statut = change["statut"]
-
     return result
 
 
-# Mapping dynamique RPC → fonction Python
 RPC_PYTHON_MAP = {
     "get_table_cmd_clients": get_table_cmd_clients_service,
-    "get_change_log": get_change_log,
+    "kpi_volume_production": get_kpi_volume_production,
+    "kpi_taux_conformite": get_kpi_taux_conformite,
+    "kpi_taux_defauts": get_kpi_taux_defauts,
+    "kpi_taux_retouche": get_kpi_taux_retouche,
+    "kpi_uph": get_kpi_uph,
+    "kpi_temps_cycle": get_kpi_temps_cycle,
+    "get_table_change_log": get_change_log,
     "kpi_nb_commandes": get_kpi_nb_commandes,
     "kpi_taux_retards": get_kpi_taux_retards,
     "kpi_otif": get_kpi_otif,
     "kpi_taux_annulation": get_kpi_taux_annulation,
     "kpi_duree_cycle_moyenne_jours": get_kpi_duree_cycle_moyenne_jours,
+    "kpi_lead_time": get_kpi_lead_time,
+    "kpi_respect_planning": get_kpi_respect_planning,
+    "kpi_adherence_plan": get_kpi_adherence_plan,
+    "kpi_wip": get_kpi_wip,
+    "kpi_trs": get_kpi_trs,
+    "kpi_productivite": get_kpi_productivite,
+    "kpi_ecart_charge": get_kpi_ecart_charge,
+    "kpi_taux_utilisation": get_kpi_taux_utilisation,
+    "kpi_efficacite": get_kpi_efficacite,
+    "kpi_cout_horaire_unite": get_kpi_cout_horaire_unite,
+    "kpi_taux_erreur": get_kpi_taux_erreur,
+    "kpi_taux_recyclage": get_kpi_taux_recyclage,
     # Ajouter d’autres fonctions Python si besoin
 }

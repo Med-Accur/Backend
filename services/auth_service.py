@@ -9,8 +9,8 @@ from services.widgets_service import RPC_PYTHON_MAP
 # Initialisation Redis
 redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
-ACCESS_TOKEN_TTL = 3600      
-REFRESH_TOKEN_TTL = 3600*24*30     
+ACCESS_TOKEN_TTL = 5 * 60  # 5 minutes
+REFRESH_TOKEN_TTL =  10 * 60  # 10 minutes  
 
 
 def login_service(response: Response, req: LoginRequest) -> LoginResponse:
@@ -30,12 +30,31 @@ def login_service(response: Response, req: LoginRequest) -> LoginResponse:
     response.set_cookie("access_token", auth_res.session.access_token, httponly=True, max_age=ACCESS_TOKEN_TTL, samesite="lax", secure=False)
     response.set_cookie("refresh_token", auth_res.session.refresh_token, httponly=True, max_age=REFRESH_TOKEN_TTL, samesite="lax", secure=False)
     return LoginResponse(
-        access_token=auth_res.session.access_token,
-        refresh_token=auth_res.session.refresh_token,
-        token_type="bearer",
         id=user.id, 
         email=user.email
     )
+
+
+def logout_service(response: Response, access_token: str = None, refresh_token: str = None) -> LogoutResponse:
+    if not access_token and not refresh_token:
+        raise HTTPException(status_code=401, detail="Aucun token fourni")
+    access_exists = redis_client.exists(f"token:{access_token}")
+    refresh_exists = redis_client.exists(f"refresh:{refresh_token}")
+
+    if not access_exists and not refresh_exists:
+        raise HTTPException(status_code=401, detail="session expirée")
+
+    if access_token:
+        redis_client.delete(f"token:{access_token}")
+    if refresh_token:
+        redis_client.delete(f"refresh:{refresh_token}")
+
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    return LogoutResponse(message="Déconnexion réussie")
+
+
 
 
 def verify_and_refresh_token_service(response: Response, access_token: str, refresh_token: str = None) -> dict:
@@ -78,103 +97,3 @@ def verify_and_refresh_token_service(response: Response, access_token: str, refr
         print("Nouveau refresh_token mis à jour dans cookie")
 
     return user_data
-
-
-def me_service(response: Response, access_token: str, refresh_token: str = None) -> MeResponse:
-    # Vérifie et refresh le token si nécessaire
-    user_data = verify_and_refresh_token_service(response, access_token, refresh_token)
-
-    user_id = user_data["id"]
-    kpi_res = supabase.table("TABLE_KPI").select("*").execute()
-    table_res = supabase.table("TABLE_TABLEAUX").select("*").execute()
-    chart_res = supabase.table("TABLE_CHART").select("*").execute()
-    map_res = supabase.table("TABLE_MAP").select("*").execute()
-
-
-    return MeResponse(
-        id=user_id,
-        email=user_data["email"],
-        kpi=kpi_res.data,
-        table=table_res.data,
-        chart=chart_res.data,
-        maps=map_res.data
-    )
-
-
-def logout_service(response: Response, access_token: str = None, refresh_token: str = None) -> LogoutResponse:
-    if not access_token and not refresh_token:
-        raise HTTPException(status_code=401, detail="Aucun token fourni")
-    access_exists = redis_client.exists(f"token:{access_token}")
-    refresh_exists = redis_client.exists(f"refresh:{refresh_token}")
-
-    if not access_exists and not refresh_exists:
-        raise HTTPException(status_code=401, detail="session expirée")
-
-    if access_token:
-        redis_client.delete(f"token:{access_token}")
-    if refresh_token:
-        redis_client.delete(f"refresh:{refresh_token}")
-
-    response.delete_cookie("access_token")
-    response.delete_cookie("refresh_token")
-
-    return LogoutResponse(message="Déconnexion réussie")
-
-
-
-
-
-def get_widget_data(response, req, access_token, refresh_token=None):
-    # Vérifier / refresh token
-    user_data = verify_and_refresh_token_service(response, access_token, refresh_token)
-
-    # Charger seulement les tables nécessaires
-    tables = load_needed_tables(req.rpcs)
-
-    results = {}
-    for rpc in req.rpcs:
-        try:
-            if rpc.rpc_name in RPC_PYTHON_MAP:
-                func = RPC_PYTHON_MAP[rpc.rpc_name]
-                results[rpc.widget_id] = func(tables, **(rpc.params or {}))
-            else:
-                results[rpc.widget_id] = {"error": f"RPC {rpc.rpc_name} non défini"}
-        except Exception as e:
-            results[rpc.widget_id] = {"error": str(e)}
-
-    return results
-
-
-def load_needed_tables(rpcs):
-    needed_tables = set()
-    for rpc in rpcs:
-        needed_tables.update(WIDGET_DEPENDENCIES.get(rpc.rpc_name, []))
-
-    loaded = {}
-    for table in needed_tables:
-        cache_key = f"table_cache:{table}"
-        cached = redis_client.get(cache_key)
-
-        if cached:
-            print(f"[CACHE] Table {table} récupérée depuis Redis")
-            loaded[table] = json.loads(cached)
-        else:
-            print(f"[SUPABASE] Chargement table {table}")
-            res = supabase.table(table).select("*").execute()
-            data = res.data or []
-
-            redis_client.setex(cache_key, 300, json.dumps(data))  # stock avec expiration
-            loaded[table] = data
-
-    return loaded
-
-WIDGET_DEPENDENCIES = {
-    "get_table_cmd_clients": ["commandeclient", "contact"],
-    "get_change_log": ["changelog"],
-    "kpi_nb_commandes": ["commandeclient"],
-    "kpi_taux_retards": ["commandeclient"],
-    "kpi_otif": ["commandeclient"],
-    "kpi_taux_annulation": ["commandeclient"],
-    "kpi_duree_cycle_moyenne_jours": ["commandeclient"],
-    # autres...
-}

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Union
 
 class LoginRequest(BaseModel):
     email: str
@@ -14,9 +14,6 @@ class MeResponse(BaseModel):
     maps: Optional[List[Dict]] = None
 
 class LoginResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
     id: str
     email: str
 
@@ -26,7 +23,6 @@ class LogoutResponse(BaseModel):
 
 
 class RpcRequest(BaseModel):
-    widget_id: str
     rpc_name: str
     params: Optional[Dict[str, Any]] = None
 
