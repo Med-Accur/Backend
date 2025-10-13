@@ -9,8 +9,8 @@ from services.widgets_service import RPC_PYTHON_MAP
 # Initialisation Redis
 redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
-ACCESS_TOKEN_TTL = 5 * 60  # 5 minutes
-REFRESH_TOKEN_TTL =  10 * 60  # 10 minutes  
+ACCESS_TOKEN_TTL = 60 * 60  # 1 hour
+REFRESH_TOKEN_TTL = 5 * 60 * 60  # 5 hours
 
 
 def login_service(response: Response, req: LoginRequest) -> LoginResponse:

@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import json
 import redis
 from services.widgets_service import RPC_PYTHON_MAP
@@ -19,6 +20,7 @@ def me_service(user_data: dict) -> MeResponse:
     table_res = supabase.table("TABLE_TABLEAUX").select("*").execute()
     chart_res = supabase.table("TABLE_CHART").select("*").execute()
     map_res   = supabase.table("TABLE_MAP").select("*").execute()
+    widget_res = supabase.table("dash_widgets").select("*").eq("user_id", user_id).execute()
 
     return MeResponse(
         id=user_id,
@@ -26,13 +28,54 @@ def me_service(user_data: dict) -> MeResponse:
         kpi=kpi_res.data,
         table=table_res.data,
         chart=chart_res.data,
-        maps=map_res.data
+        maps=map_res.data,
+        widgets=widget_res.data
     )
 
-def get_widget_data(response, req):
-    # Charger seulement les tables nécessaires
-    tables = load_needed_tables(req.rpcs)
 
+def post_widget(response, req, user):
+    try:
+        user_id = user["id"]
+
+        existing = supabase.table("dash_widgets").select("id").eq("user_id", user_id).execute()
+
+        if existing.data and len(existing.data) > 0:
+            print(f"Existing config found for user {user_id}, replacing it...")
+
+            # 🗑️ Étape 2 : Supprimer l’ancienne config avant d’enregistrer la nouvelle
+            supabase.table("dash_widgets").delete().eq("user_id", user_id).execute()
+
+        # 🧱 Étape 3 : Construire les nouveaux widgets
+        inserts = [
+            {
+                "user_id": user_id,
+                "widget_key": w.key,
+                "widget_type": w.type,
+                "x": w.x,
+                "y": w.y,
+                "w": w.w,
+                "h": float(w.h),
+            }
+            for w in req
+        ]
+
+        print("Inserts to be made:", inserts)
+
+        if not inserts:
+            return {"status": "no_data", "inserted": 0}
+        else:
+            data = supabase.table("dash_widgets").insert(inserts).execute()
+
+            return {"status": "success", "inserted": len(data.data)}
+
+    except Exception as e:
+        print("Error while saving widgets:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def get_widget_data(response, req):
+    tables = load_needed_tables(req.rpcs)
+    print(f"params: {req.rpcs}")
     results = {}
     for rpc in req.rpcs:
         try:
@@ -71,6 +114,13 @@ def load_needed_tables(rpcs):
     return loaded
 
 WIDGET_DEPENDENCIES = {
+    "rpc_duree_changelog_chart": ["changelog"],
+    "get_kpi_duree_moyenne_changelog": ["changelog"],
+    "rpc_duree_cycle_moyenne": ["commandeclient", "modelivraison"],
+    "rpc_taux_annulation": ["commandeclient", "modelivraison"],
+    "rpc_nb_otif": ["commandeclient","modelivraison"],
+    "rpc_taux_retard": ["commandeclient","modelivraison"],
+    "rpc_orders_chart": ["commandeclient","modelivraison"],
     "get_table_cmd_clients": ["commandeclient", "contact"],
     "get_table_change_log": ["changelog"],
     "kpi_nb_commandes": ["commandeclient"],

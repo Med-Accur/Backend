@@ -12,6 +12,7 @@ class MeResponse(BaseModel):
     table: Optional[List[Dict]] = None
     chart: Optional[List[Dict]] = None
     maps: Optional[List[Dict]] = None
+    widgets: Optional[List[Dict]] = None
 
 class LoginResponse(BaseModel):
     id: str
@@ -28,3 +29,11 @@ class RpcRequest(BaseModel):
 
 class MultiRpcRequest(BaseModel):
     rpcs: List[RpcRequest]
+
+class Widget(BaseModel):
+    key: str
+    type: str
+    x: float
+    y: float
+    w: float
+    h: float

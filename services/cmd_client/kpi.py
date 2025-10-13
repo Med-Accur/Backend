@@ -24,5 +24,17 @@ def get_kpi_taux_annulation(tables):
 
 def get_kpi_duree_cycle_moyenne_jours(tables):
     commandes = tables.get("commandeclient", [])
-    durees = [(datetime.strptime(c["date_reelle_livraison"], "%Y-%m-%d").date() - datetime.strptime(c["date_commande"], "%Y-%m-%d").date()).days for c in commandes if c.get("date_reelle_livraison") and c.get("date_commande")]
+    durees = [(datetime.strptime(c["date_expedition"], "%Y-%m-%d").date() - datetime.strptime(c["date_commande"], "%Y-%m-%d").date()).days for c in commandes if c.get("date_reelle_livraison") and c.get("date_commande")]
     return round(sum(durees)/len(durees), 2) if durees else None
+
+from datetime import datetime
+
+def get_kpi_duree_moyenne_changelog(tables):
+    changelogs = sorted(tables.get("changelog", []), key=lambda x: (x["commande_id"], x["date_changement_statut"]))
+    durees = [
+        (datetime.strptime(changelogs[i]["date_changement_statut"], "%Y-%m-%d").date() -
+         datetime.strptime(changelogs[i-1]["date_changement_statut"], "%Y-%m-%d").date()).days
+        for i in range(1, len(changelogs))
+        if changelogs[i]["commande_id"] == changelogs[i-1]["commande_id"]
+    ]
+    return round(sum(durees) / len(durees), 2) if durees else None

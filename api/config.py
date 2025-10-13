@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, Response, Cookie
-from dto.auth_dto import LoginRequest, LoginResponse, MeResponse, LogoutResponse, MultiRpcRequest
+from dto.auth_dto import LoginRequest, LoginResponse, MeResponse, Widget, MultiRpcRequest
 from Deps.auth import current_user_from_cookies
-from services.auth_service import login_service, logout_service
-from services.config_service import me_service, get_widget_data
+from services.config_service import me_service, get_widget_data, post_widget
 import redis
 import json
 
@@ -18,4 +17,9 @@ def me(user=Depends(current_user_from_cookies)):
 @router.post("/{module}/widgets")
 def get_widgets(response: Response, req: MultiRpcRequest, user=Depends(current_user_from_cookies)):
     me_data = get_widget_data(response, req)
+    return me_data
+
+@router.post("/config/me/widgets")
+def post_widgets(response: Response, req: list[Widget], user=Depends(current_user_from_cookies)):
+    me_data = post_widget(response, req, user)
     return me_data
