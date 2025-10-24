@@ -3,7 +3,7 @@ import redis
 from fastapi import HTTPException, status, Response
 from dto.auth_dto import LoginRequest, LoginResponse, MeResponse, LogoutResponse, MultiRpcRequest
 from core.config import supabase
-from services.widgets_service import RPC_PYTHON_MAP
+
 
 
 # Initialisation Redis
