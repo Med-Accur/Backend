@@ -1,4 +1,5 @@
 import json
+import os
 import redis
 from fastapi import HTTPException, status, Response
 from dto.auth_dto import LoginRequest, LoginResponse, MeResponse, LogoutResponse, MultiRpcRequest
@@ -7,7 +8,11 @@ from core.config import supabase
 
 
 # Initialisation Redis
-redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+redis_client = redis.from_url(
+    os.getenv("REDIS_URL"),
+    decode_responses=True
+    #ssl=True   indispensable pour Redis Cloud (TLS)
+)
 
 ACCESS_TOKEN_TTL = 60 * 60  # 1 hour
 REFRESH_TOKEN_TTL = 5 * 60 * 60  # 5 hours

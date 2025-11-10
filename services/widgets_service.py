@@ -94,12 +94,12 @@ from services.fournisseur.chart import (
 
 
 RPC_PYTHON_MAP = {
-    "get_kpi_duree_moyenne_changelog": get_kpi_duree_moyenne_changelog,
-    "rpc_duree_cycle_moyenne": rpc_duree_cycle_moyenne,
-    "rpc_taux_annulation": rpc_taux_annulation,
-    "rpc_nb_otif": rpc_nb_otif,
-    "rpc_taux_retard": rpc_taux_retard,
-    "rpc_orders_chart": rpc_orders_chart,
+    "kpi_duree_moyenne_changelog": get_kpi_duree_moyenne_changelog,
+    "chart_duree_cycle_moyenne": rpc_duree_cycle_moyenne,
+    "chart_taux_annulation": rpc_taux_annulation,
+    "chart_otif": rpc_nb_otif,
+    "chart_taux_retard": rpc_taux_retard,
+    "chart_commandes_client": rpc_orders_chart,
     "get_table_cmd_clients": get_table_cmd_clients_service,
     "kpi_volume_production": get_kpi_volume_production,
     "kpi_taux_conformite": get_kpi_taux_conformite,
@@ -142,8 +142,7 @@ RPC_PYTHON_MAP = {
     "kpi_sup_return_rate": get_sup_return_rate,
     "kpi_sup_avg_lead_time_days": get_sup_avg_lead_time_days,
     "kpi_sup_transport_cost_ratio": get_sup_transport_cost_ratio,
-    "get_kpi_duree_moyenne_changelog": get_kpi_duree_moyenne_changelog,
-    "rpc_duree_changelog_chart": rpc_duree_changelog_chart,
+    "chart_duree_changelog": rpc_duree_changelog_chart,
     
     "rpc_stock_disponible_series": rpc_stock_disponible_series,
     "rpc_days_on_hand_series": rpc_days_on_hand_series,

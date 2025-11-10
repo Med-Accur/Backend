@@ -1,3 +1,4 @@
+import os
 from fastapi import HTTPException
 import json
 import redis
@@ -6,8 +7,11 @@ from core.config import supabase
 from dto.auth_dto import MeResponse 
 
 # Initialisation Redis
-redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
-
+redis_client = redis.from_url(
+    os.getenv("REDIS_URL"),
+    decode_responses=True
+    #ssl=True  # indispensable pour Redis Cloud (TLS)
+)
 
 def me_service(user_data: dict) -> MeResponse:
     """
@@ -33,22 +37,27 @@ def me_service(user_data: dict) -> MeResponse:
     )
 
 
-def post_widget(response, req, user):
+def post_widget(response, req, user, module):
     try:
         user_id = user["id"]
-
-        existing = supabase.table("dash_widgets").select("id").eq("user_id", user_id).execute()
+        print(f"Enregistrement des widgets pour user {user_id} module '{module}'")
+        existing = (
+            supabase.table("dash_widgets")
+            .select("id")
+            .eq("user_id", user_id)
+            .eq("dashboard", module)
+            .execute()
+        )
 
         if existing.data and len(existing.data) > 0:
-            print(f"Existing config found for user {user_id}, replacing it...")
+            print(f"Config existante pour user {user_id} module '{module}', on la remplace…")
 
-            # 🗑️ Étape 2 : Supprimer l’ancienne config avant d’enregistrer la nouvelle
-            supabase.table("dash_widgets").delete().eq("user_id", user_id).execute()
+            supabase.table("dash_widgets").delete().eq("user_id", user_id).eq("dashboard", module).execute()
 
-        # 🧱 Étape 3 : Construire les nouveaux widgets
         inserts = [
             {
                 "user_id": user_id,
+                "dashboard": module,
                 "widget_key": w.key,
                 "widget_type": w.type,
                 "x": w.x,
@@ -59,18 +68,21 @@ def post_widget(response, req, user):
             for w in req
         ]
 
-        print("Inserts to be made:", inserts)
-
         if not inserts:
             return {"status": "no_data", "inserted": 0}
-        else:
-            data = supabase.table("dash_widgets").insert(inserts).execute()
 
-            return {"status": "success", "inserted": len(data.data)}
+        data = supabase.table("dash_widgets").insert(inserts).execute()
+        print(f"Widgets enregistrés pour user {user_id} module '{module}'")
+        return {
+            "status": "success",
+            "dashboard": module,
+            "inserted": len(data.data)
+        }
 
     except Exception as e:
-        print("Error while saving widgets:", e)
+        print("Erreur lors de l’enregistrement des widgets:", e)
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 def get_widget_data(response, req):
@@ -114,13 +126,13 @@ def load_needed_tables(rpcs):
     return loaded
 
 WIDGET_DEPENDENCIES = {
-    "rpc_duree_changelog_chart": ["changelog"],
-    "get_kpi_duree_moyenne_changelog": ["changelog"],
-    "rpc_duree_cycle_moyenne": ["commandeclient", "modelivraison"],
-    "rpc_taux_annulation": ["commandeclient", "modelivraison"],
-    "rpc_nb_otif": ["commandeclient","modelivraison"],
-    "rpc_taux_retard": ["commandeclient","modelivraison"],
-    "rpc_orders_chart": ["commandeclient","modelivraison"],
+    "chart_duree_changelog": ["changelog"],
+    "kpi_duree_moyenne_changelog": ["changelog"],
+    "chart_duree_cycle_moyenne": ["commandeclient", "modelivraison"],
+    "chart_taux_annulation": ["commandeclient", "modelivraison"],
+    "chart_otif": ["commandeclient","modelivraison"],
+    "chart_taux_retard": ["commandeclient","modelivraison"],
+    "chart_commandes_client": ["commandeclient","modelivraison"],
     "get_table_cmd_clients": ["commandeclient", "contact"],
     "get_table_change_log": ["changelog"],
     "kpi_nb_commandes": ["commandeclient"],
