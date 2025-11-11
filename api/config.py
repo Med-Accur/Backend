@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Response, Cookie
-from dto.auth_dto import LoginRequest, LoginResponse, MeResponse, Widget, MultiRpcRequest
+from dto.auth_dto import  MeResponse, Widget, MultiRpcRequest
 from Deps.auth import current_user_from_cookies
 from services.config_service import me_service, get_widget_data, post_widget
 

@@ -32,8 +32,8 @@ def login_service(response: Response, req: LoginRequest) -> LoginResponse:
     redis_client.setex(f"token:{auth_res.session.access_token}", ACCESS_TOKEN_TTL, json.dumps(user_cache))
     redis_client.setex(f"refresh:{auth_res.session.refresh_token}", REFRESH_TOKEN_TTL, json.dumps(user_cache))
 
-    response.set_cookie("access_token", auth_res.session.access_token, httponly=True, max_age=ACCESS_TOKEN_TTL, samesite="lax", secure=False)
-    response.set_cookie("refresh_token", auth_res.session.refresh_token, httponly=True, max_age=REFRESH_TOKEN_TTL, samesite="lax", secure=False)
+    response.set_cookie("access_token", auth_res.session.access_token, httponly=True, max_age=ACCESS_TOKEN_TTL, secure=True, samesite="none")
+    response.set_cookie("refresh_token", auth_res.session.refresh_token, httponly=True, max_age=REFRESH_TOKEN_TTL, secure=True, samesite="none")
     return LoginResponse(
         id=user.id, 
         email=user.email
