@@ -126,7 +126,7 @@ def load_needed_tables(rpcs):
     return loaded
 
 WIDGET_DEPENDENCIES = {
-    "chart_duree_changelog": ["changelog"],
+   "chart_duree_changelog": ["changelog"],
     "kpi_duree_moyenne_changelog": ["changelog"],
     "chart_duree_cycle_moyenne": ["commandeclient", "modelivraison"],
     "chart_taux_annulation": ["commandeclient", "modelivraison"],
@@ -176,7 +176,7 @@ WIDGET_DEPENDENCIES = {
     "kpi_sup_return_rate": ["reception_fournisseur", "retour_fournisseur"],
     "kpi_sup_avg_lead_time_days": ["commande_fournisseur", "reception_fournisseur"],
     "kpi_sup_transport_cost_ratio": ["commande_fournisseur", "ligne_cmd_fournisseur", "reception_fournisseur"],
-     "rpc_stock_disponible_series": ["stock"],
+    "rpc_stock_disponible_series": ["stock"],
     "rpc_days_on_hand_series": ["stock", "mouvement_stock"],
     "rpc_taux_rotation_series": ["stock", "commandeclient", "lignecommande", "produit"],
     "rpc_inventory_to_sales_series": ["stock", "commandeclient", "lignecommande", "produit"],
@@ -191,4 +191,16 @@ WIDGET_DEPENDENCIES = {
     "rpc_sup_return_rate_series": ["reception_fournisseur", "retour_fournisseur"],
     "rpc_sup_avg_lead_time_days_series": ["commande_fournisseur", "reception_fournisseur"],
     "rpc_sup_transport_cost_ratio_series": ["commande_fournisseur"],
+
+
+    "prod_volume_ok":          ["sortie_production"],
+    "prod_volume_nok":         ["sortie_production"],
+    "prod_volume_total":       ["sortie_production"],
+    "prod_taux_qualite":       ["sortie_production"],
+    "prod_taux_defauts":       ["sortie_production"],
+    "prod_rendement_vs_cible": ["sortie_production", "ordre_production"],
+    "prod_lead_time_of":       ["ordre_production", "phase_production"],
+    "prod_wip_op_en_cours":    ["ordre_production"],
+
+
 }
