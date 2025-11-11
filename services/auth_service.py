@@ -94,11 +94,11 @@ def verify_and_refresh_token_service(response: Response, access_token: str, refr
         print("Nouveau access_token et refresh_token générés via refresh")
 
     if new_access_token:
-        response.set_cookie("access_token", new_access_token, httponly=True, max_age=ACCESS_TOKEN_TTL, samesite="lax", secure=False)
+        response.set_cookie("access_token", new_access_token, httponly=True, max_age=ACCESS_TOKEN_TTL, secure=True, samesite="none")
         print("Nouveau access_token mis à jour dans cookie")
 
     if new_refresh_token:
-        response.set_cookie("refresh_token", new_refresh_token, httponly=True, max_age=REFRESH_TOKEN_TTL, samesite="lax", secure=False)
+        response.set_cookie("refresh_token", new_refresh_token, httponly=True, max_age=REFRESH_TOKEN_TTL, secure=True, samesite="none")
         print("Nouveau refresh_token mis à jour dans cookie")
 
     return user_data
