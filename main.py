@@ -6,7 +6,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:5173",
-    "https://accurtower.onrender.com"
+    "https://controle-tower-supplychain.vercel.app"
 ]
 
 app.add_middleware(
