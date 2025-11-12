@@ -7,9 +7,6 @@ from services.auth_service import login_service, logout_service
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-
-
-
 @router.post("/login", response_model=LoginResponse)
 def login(response: Response, req: LoginRequest):
     login_data = login_service(response, req)

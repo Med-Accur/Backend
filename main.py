@@ -6,6 +6,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:5173",
+    "https://accurtower.onrender.com"
 ]
 
 app.add_middleware(
